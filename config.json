@@ -1,0 +1,20 @@
+{
+  "enabledChecks": {
+    "checkDependencies": true,
+    "checkGitignore": true,
+    "checkREADME": true,
+    "checkComponentsFolder": true,
+    "checkBuildTool": false,
+    "checkTestingFramework": true,
+    "checkImplicitAny": true,
+    "checkReactFCUsage": true,
+    "checkStateManagement": true,
+    "checkPrettierConfig": true,
+    "checkFunctionComments": true
+  },
+  "dependenciesToCheck": [
+    "@tanstack/react-query",
+    "@tanstack/react-query-devtools",
+    "mssql"
+  ]
+}

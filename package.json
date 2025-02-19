@@ -1,0 +1,23 @@
+{
+  "name": "react-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@tanstack/react-query": "^5.66.7",
+    "@tanstack/react-query-devtools": "^5.66.7",
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.6",
+    "mssql": "^11.0.1",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.6"
+  }
+}
