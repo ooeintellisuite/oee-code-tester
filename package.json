@@ -3,21 +3,47 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "lint:fix": "eslint --fix"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "eslint-plugin-custom-rules": "file:./eslint-plugin-custom-rules",
   "dependencies": {
+    "@next/eslint-plugin-next": "^15.1.7",
     "@tanstack/react-query": "^5.66.7",
     "@tanstack/react-query-devtools": "^5.66.7",
     "chalk": "^4.1.2",
+    "eslint-plugin-security": "^3.0.1",
     "inquirer": "^8.2.6",
     "mssql": "^11.0.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^22.13.5",
+    "@typescript-eslint/eslint-plugin": "^8.24.1",
+    "@typescript-eslint/parser": "^8.24.1",
+    "eslint": "^9.20.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsdoc": "^50.6.3",
+    "eslint-plugin-no-secrets": "^2.2.1",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "next": "^15.1.7",
+    "prettier": "^3.5.2",
+    "ts-node": "^10.9.2",
+    "turbo": "^2.4.2",
     "vitest": "^3.0.6"
   }
 }
