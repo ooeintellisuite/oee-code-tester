@@ -16,7 +16,7 @@ const noRedux = require('./eslint-plugin-custom-rules/rules/no-redux.js');
 
 module.exports = [
   {
-    ignores: ['dist', 'eslint.config.js', 'eslint-plugin-custom-rules/rules/no-redux.js'],
+    ignores: ['**/.next/**', '**/.dist/**', '**/wwwroot/lib/**', 'eslint.config.js', 'eslint-plugin-custom-rules/rules/no-redux.js'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -74,6 +74,9 @@ module.exports = [
       '@typescript-eslint/explicit-module-boundary-types': 'warn',
     },
   },
+  {
+    ignores: ['**/.next/**', '**/.dist/**', '**/wwwroot/lib/**', 'eslint.config.js', 'eslint-plugin-custom-rules/rules/no-redux.js'],
+  }
 ];`.trim();
 
 /**
