@@ -1,7 +1,5 @@
-import { execSync } from 'child_process';
 import path from 'path';
 
-import chalk from 'chalk';
 
 import { generateChecksum } from './checksumUtils';
 import { readFile, writeFile } from './fileUtils';
@@ -53,9 +51,7 @@ export function isPrettierConfigValid(userConfig: string): boolean {
  * @returns {void}
  */
 export function createPrettierConfig(): void {
-  console.log(chalk.red('❌ .prettierrc not found! Creating one...'));
   writeFile(prettierConfigPath, expectedPrettierConfigString);
-  console.log(chalk.green('✔ .prettierrc has been created.'));
 }
 
 /**
@@ -64,24 +60,5 @@ export function createPrettierConfig(): void {
  * @returns {void}
  */
 export function fixPrettierConfig(): void {
-  console.log(chalk.red('❌ .prettierrc settings are incorrect! Fixing it...'));
   writeFile(prettierConfigPath, expectedPrettierConfigString);
-  console.log(chalk.green('✔ .prettierrc has been updated.'));
-}
-
-/**
- * Runs Prettier formatting on the project.
- * If formatting fails, logs an error and exits with a non-zero status.
- *
- * @returns {void}
- */
-export function runPrettier(): void {
-  try {
-    console.log(chalk.yellow('🚀 Running Prettier formatting...'));
-    execSync('npx prettier --write .', { stdio: 'inherit' });
-    console.log(chalk.green('✔ Prettier formatting completed.'));
-  } catch (error) {
-    console.error(chalk.red('❌ Prettier formatting failed.', error));
-    process.exit(1);
-  }
 }

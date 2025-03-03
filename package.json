@@ -2,6 +2,7 @@
   "name": "react-test",
   "version": "1.0.0",
   "main": "index.js",
+  "packageManager": "npm@10.8.1",
   "scripts": {
     "test": "vitest",
     "lint:fix": "eslint --fix"
@@ -18,8 +19,13 @@
   "eslint-plugin-custom-rules": "file:./eslint-plugin-custom-rules",
   "dependencies": {
     "@next/eslint-plugin-next": "^15.1.7",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-prometheus": "^0.57.2",
+    "@opentelemetry/exporter-zipkin": "^1.30.1",
+    "@opentelemetry/sdk-node": "^0.57.2",
     "@tanstack/react-query": "^5.66.7",
     "@tanstack/react-query-devtools": "^5.66.7",
+    "@vitest/spy": "^3.0.7",
     "chalk": "^4.1.2",
     "eslint-plugin-security": "^3.0.1",
     "inquirer": "^8.2.6",
@@ -44,6 +50,6 @@
     "prettier": "^3.5.2",
     "ts-node": "^10.9.2",
     "turbo": "^2.4.2",
-    "vitest": "^3.0.6"
+    "vitest": "^3.0.7"
   }
 }

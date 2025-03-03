@@ -1,7 +1,5 @@
 import path from 'path';
 
-import chalk from 'chalk';
-
 import { generateChecksum } from './checksumUtils';
 import { readFile, writeFile } from './fileUtils';
 
@@ -45,9 +43,7 @@ export function isTsConfigValid(userConfig: string): boolean {
  * @returns {void}
  */
 export function createTsConfig(): void {
-  console.log(chalk.red('❌ No tsconfig.json file found! Creating one...'));
   writeFile(tsconfigPath, expectedTsconfig);
-  console.log(chalk.green('✔ tsconfig.json has been created.'));
 }
 
 /**
@@ -55,11 +51,5 @@ export function createTsConfig(): void {
  * @returns {void}
  */
 export function fixTsConfig(): void {
-  console.log(chalk.red('❌ tsconfig.json is incorrect! Fixing it...'));
   writeFile(tsconfigPath, expectedTsconfig);
-  console.log(
-    chalk.green(
-      '✔ tsconfig.json has been updated to the correct configuration.',
-    ),
-  );
 }

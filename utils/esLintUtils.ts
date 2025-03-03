@@ -1,7 +1,5 @@
-import { execSync } from 'child_process';
 import path from 'path';
 
-import chalk from 'chalk';
 
 import { generateChecksum } from './checksumUtils';
 import { readFile, writeFile } from './fileUtils';
@@ -106,9 +104,7 @@ export function isESLintConfigValid(userConfig: string): boolean {
  * @returns {void}
  */
 export function createESLintConfig(): void {
-  console.log(chalk.red('❌ No eslint.config.js found! Creating one...'));
   writeFile(eslintConfigPath, expectedESLintConfig);
-  console.log(chalk.green('✔ eslint.config.js has been created.'));
 }
 
 /**
@@ -117,29 +113,5 @@ export function createESLintConfig(): void {
  * @returns {void}
  */
 export function fixESLintConfig(): void {
-  console.log(chalk.red('❌ eslint.config.js is incorrect! Fixing it...'));
   writeFile(eslintConfigPath, expectedESLintConfig);
-  console.log(
-    chalk.green(
-      '✔ eslint.config.js has been updated to the correct configuration.',
-    ),
-  );
-}
-
-/**
- * Runs ESLint checks on the project using `npx eslint .`.
- * If errors are found, logs a message and exits with a non-zero status.
- *
- * @returns {void}
- */
-export function runESLint(): void {
-  try {
-    console.log(chalk.yellow('🚀 Running ESLint checks...'));
-    execSync('npx eslint .', { stdio: 'inherit' });
-    console.log(chalk.green('✔ ESLint checks completed successfully.'));
-  } catch (error) {
-    console.error(chalk.red('❌ ESLint found issues.', error));
-    console.log(chalk.red('\n👉 Fix ESLint config: npm run lint:fix'));
-    process.exit(1);
-  }
 }

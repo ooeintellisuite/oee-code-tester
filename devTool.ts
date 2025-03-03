@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import * as path from 'path';
 
 import chalk from 'chalk';
@@ -13,8 +14,7 @@ import {
   isESLintConfigValid,
   createESLintConfig,
   fixESLintConfig,
-  runESLint,
-} from './utils/esLintConfig';
+} from './utils/esLintUtils';
 import { fileExists, readFile, writeFile } from './utils/fileUtils';
 import {
   readGitignore,
@@ -27,7 +27,6 @@ import {
   fixPrettierConfig,
   isPrettierConfigValid,
   readPrettierConfig,
-  runPrettier,
 } from './utils/prettierUtils';
 import {
   createTsConfig,
@@ -35,6 +34,7 @@ import {
   fixTsConfig,
   readTsConfig,
 } from './utils/tsConfigUtils';
+
 
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
@@ -92,7 +92,7 @@ const config: Config = JSON.parse(readFile(CONFIG_PATH)!);
  * Displays an interactive main menu allowing users to start or exit the checks.
  * @returns {Promise<void>} A promise that resolves when the menu action is completed.
  */
-async function mainMenu(): Promise<void> {
+export async function mainMenu(): Promise<void> {
   const { choice } = (await inquirer.prompt([
     {
       type: 'list',
@@ -114,14 +114,14 @@ async function mainMenu(): Promise<void> {
  * Runs the enabled codebase checks based on the configuration settings.
  *  @returns {void}
  */
-function runChecks(): void {
+export function runChecks(): void {
   console.log(chalk.blue('\n🔍 Running codebase checks...\n'));
   if (config.enabledChecks.checkTsConfig) checkTsConfig();
   if (config.enabledChecks.checkDependencies) checkDependencies();
   if (config.enabledChecks.checkGitignore) checkGitignore();
   if (config.enabledChecks.checkREADME) checkREADME();
   if (config.enabledChecks.checkPrettierConfig) checkPrettierConfig();
-  if (config.enabledChecks.checkESLint) checkESLint();
+  if (config.enabledChecks.checkESLint) checkESLintConfig();
   console.log(chalk.green('\n✅ Codebase check complete.\n'));
   mainMenu();
 }
@@ -131,13 +131,21 @@ function runChecks(): void {
  * If it does not exist, it creates one. If it is incorrect, it fixes it.
  *  @returns {void}
  */
-function checkTsConfig(): void {
+export function checkTsConfig(): void {
   console.log(chalk.yellow('🔍 Checking tsconfig.json...'));
   const userTsConfig = readTsConfig();
   if (!userTsConfig) {
-    createTsConfig();
+      console.log(chalk.red('❌ No tsconfig.json file found! Creating one...'));
+      createTsConfig();
+      console.log(chalk.green('✔ tsconfig.json has been created.'));
   } else if (!isTsConfigValid(userTsConfig)) {
-    fixTsConfig();
+      console.log(chalk.red('❌ tsconfig.json is incorrect! Fixing it...'));
+      fixTsConfig();
+      console.log(
+        chalk.green(
+          '✔ tsconfig.json has been updated to the correct configuration.',
+        ),
+      );
   } else {
     console.log(
       chalk.green('✔ tsconfig.json matches the expected configuration.'),
@@ -147,10 +155,10 @@ function checkTsConfig(): void {
 
 /**
  * Checks if all required dependencies are installed.
- * 
+ *
  * @returns {boolean} Returns `true` if all required dependencies are installed, otherwise `false`.
  */
-function checkDependencies(): boolean {
+export function checkDependencies(): boolean {
   console.log(chalk.yellow('🔍 Checking dependencies...'));
 
   const packageJsonPath = path.join(process.cwd(), 'package.json');
@@ -158,19 +166,24 @@ function checkDependencies(): boolean {
 
   if (!packageJson) {
     console.log(chalk.red('❌ No package.json found!'));
-    console.log(chalk.blue('👉 Fix missing package.json: npm init -y'));
+    console.log(chalk.red('👉 Fix missing package.json: npm init -y'));
     return false;
   }
 
   const installedDependencies = getInstalledDependencies(packageJson);
   const requiredDependencies = config.dependenciesToCheck;
 
-  const allPassed = areDependenciesValid(
+  const result = areDependenciesValid(
     installedDependencies,
     requiredDependencies,
   );
 
-  if (allPassed) {
+  if (!result.valid) {
+    result.missing.forEach((dep) => {
+      console.log(chalk.red(`❌ Missing dependency: ${dep}`));
+      console.log(chalk.red(`\n👉 Fix Missing dependency: npm install ${dep}`));
+    });
+  } else {
     console.log(chalk.green('✔ All required dependencies are installed.'));
     return true;
   }
@@ -182,36 +195,39 @@ function checkDependencies(): boolean {
  * Checks if a `.gitignore` file exists in the project directory.
  * If it does not exist, a new one is created.
  * If it exists but is invalid, it is fixed.
- * 
+ *
  * @returns {boolean} Always returns `true` since it ensures a `.gitignore` file is properly set.
  */
-function checkGitignore(): boolean {
+export function checkGitignore(): boolean {
   console.log(chalk.yellow('🔍 Checking .gitignore...'));
-
   const userGitignore = readGitignore();
-
   if (!userGitignore) {
+    console.log(chalk.red('❌ No .gitignore file found! Creating one...'));
     createGitignore();
+    console.log(chalk.green('✔ .gitignore has been created.'));
     return true;
-  }
-
-  if (isGitignoreValid(userGitignore)) {
+  } else if (!isGitignoreValid(userGitignore)) {
+    console.log(chalk.red('❌ .gitignore is incorrect! Fixing it...'));
+    fixGitignore();
+    console.log(
+      chalk.green(
+        '✔ .gitignore has been updated to the correct configuration.',
+      ),
+    );
+  } else {
     console.log(
       chalk.green('✔ .gitignore matches the expected configuration.'),
     );
-    return true;
   }
-
-  fixGitignore();
   return true;
 }
 
 /**
  * Checks if a `README.md` file exists in the project directory.
- * 
+ *
  * @returns {boolean} Returns `true` if `README.md` exists, otherwise `false`.
  */
-function checkREADME(): boolean {
+export function checkREADME(): boolean {
   console.log(chalk.yellow('Checking README.md...'));
 
   const readmePath = path.join(process.cwd(), 'README.md');
@@ -231,21 +247,33 @@ function checkREADME(): boolean {
  * Finally, Prettier is run to enforce formatting rules.
  * @returns {void}
  */
-function checkPrettierConfig(): void {
+export function checkPrettierConfig(): void {
   console.log(chalk.yellow('🔍 Checking Prettier configuration...'));
 
   const userPrettierConfig = readPrettierConfig();
 
   if (!userPrettierConfig) {
+    console.log(chalk.red('❌ .prettierrc not found! Creating one...'));
     createPrettierConfig();
+    console.log(chalk.green('✔ .prettierrc has been created.'));
   } else if (!isPrettierConfigValid(userPrettierConfig)) {
+    console.log(chalk.red('❌ .prettierrc settings are incorrect! Fixing it...'));
     fixPrettierConfig();
+    console.log(chalk.green('✔ .prettierrc has been updated.'));
   } else {
-    console.log(
-      chalk.green('✔ .prettierrc matches the recommended configuration.'),
-    );
+    try {
+      console.log(chalk.yellow('🚀 Running Prettier formatting...'));
+      console.log(
+        chalk.green('✔ .prettierrc matches the recommended configuration.'),
+      );
+      execSync('npx prettier --write .', { stdio: 'inherit' });
+      console.log(chalk.green('✔ Prettier formatting completed.'));
+    } catch (error) {
+      console.error(chalk.red('❌ Prettier formatting failed.', error));
+      console.log(chalk.red('\n👉 Fix Prettier config: npx prettier --write .'));
+      process.exit(1);
+    }
   }
-  runPrettier();
 }
 
 /**
@@ -255,21 +283,37 @@ function checkPrettierConfig(): void {
  * Finally, ESLint is run to check for linting issues.
  * @returns {void}
  */
-function checkESLint(): void {
+export function checkESLintConfig(): void {
   console.log(chalk.yellow('🔍 Checking ESLint configuration...'));
 
   const userESLintConfig = readESLintConfig();
 
   if (!userESLintConfig) {
+    console.log(chalk.red('❌ No eslint.config.js found! Creating one...'));
     createESLintConfig();
+    console.log(chalk.green('✔ eslint.config.js has been created.'));
   } else if (!isESLintConfigValid(userESLintConfig)) {
+    console.log(chalk.red('❌ eslint.config.js is incorrect! Fixing it...'));
     fixESLintConfig();
+    console.log(
+      chalk.green(
+        '✔ eslint.config.js has been updated to the correct configuration.',
+      ),
+    );
   } else {
     console.log(
       chalk.green('✔ eslint.config.js matches the expected configuration.'),
     );
+    try {
+      console.log(chalk.yellow('🚀 Running ESLint checks...'));
+      execSync('npx eslint .', { stdio: 'inherit' });
+      console.log(chalk.green('✔ ESLint checks completed successfully.'));
+    } catch (error) {
+      console.error(chalk.red('❌ ESLint found issues.', error));
+      console.log(chalk.red('\n👉 Fix ESLint config: npm run lint:fix'));
+      process.exit(1);
+    }
   }
-  runESLint();
 }
 
 mainMenu();

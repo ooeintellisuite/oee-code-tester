@@ -1,7 +1,5 @@
 import path from 'path';
 
-import chalk from 'chalk';
-
 import { generateChecksum } from './checksumUtils';
 import { readFile, writeFile } from './fileUtils';
 
@@ -47,9 +45,7 @@ export function readGitignore(): string | null {
  * @returns {void}
  */
 export function createGitignore(): void {
-  console.log(chalk.red('❌ No .gitignore file found! Creating one...'));
   writeFile(gitignorePath, expectedGitignore);
-  console.log(chalk.green('✔ .gitignore has been created.'));
 }
 
 /**
@@ -66,9 +62,5 @@ export function isGitignoreValid(userConfig: string): boolean {
  * @returns {void}
  */
 export function fixGitignore(): void {
-  console.log(chalk.red('❌ .gitignore is incorrect! Fixing it...'));
   writeFile(gitignorePath, expectedGitignore);
-  console.log(
-    chalk.green('✔ .gitignore has been updated to the correct configuration.'),
-  );
 }
