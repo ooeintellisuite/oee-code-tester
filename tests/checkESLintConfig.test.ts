@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { execSync } from 'child_process';
 
 import chalk from 'chalk';
@@ -66,19 +67,42 @@ describe('checkESLintConfig', () => {
     logSpy.mockRestore();
   });
   it('should log an error and exit when eslint.config.js fails', () => {
-    // Mock console.error and process.exit
+    vi.mocked(readESLintConfig).mockReturnValue('correct content');
+    vi.mocked(isESLintConfigValid).mockReturnValue(true);
+
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+        return undefined as never;
+        });
+    // Mock execSync to throw an error
+    vi.mocked(execSync).mockImplementation(() => {
+        throw new Error('Mocked Prettier formatting error');
+    });
 
     checkESLintConfig(); // Run function
 
-    expect(errorSpy).toHaveBeenCalled(); // Ensure error logging happens
-    expect(errorSpy.mock.calls[0][0]).toContain('❌ ESLint found issues');
+    expect(logSpy).toHaveBeenCalledWith(chalk.yellow('🔍 Checking ESLint configuration...'));
+        expect(logSpy).toHaveBeenCalledWith(chalk.green('✔ eslint.config.js matches the expected configuration.'));
+        expect(logSpy).toHaveBeenCalledWith(chalk.yellow('🚀 Running ESLint checks...'));
     
-    expect(exitSpy).toHaveBeenCalledWith(1); // Ensure process.exit is called
+        // Ensure error logging is correct
+        expect(errorSpy).toHaveBeenCalledWith(
+            chalk.red('❌ ESLint found issues.'), expect.any(Error)
+          );
+    
+        expect(logSpy).toHaveBeenCalledWith(chalk.red('\n👉 Fix ESLint config: npm run lint:fix'));
 
-    // Restore mocks
-    errorSpy.mockRestore();
-    exitSpy.mockRestore();
+        // Ensure process.exit is called with exit code 1
+        expect(exitSpy).toHaveBeenCalledWith(1);
+    
+        // Ensure config creation/fixing was not triggered
+        expect(vi.mocked(fixESLintConfig)).not.toHaveBeenCalled();
+        expect(vi.mocked(createESLintConfig)).not.toHaveBeenCalled();
+    
+        // Restore mocks
+        logSpy.mockRestore();
+        errorSpy.mockRestore();
+        exitSpy.mockRestore();
   });
 });

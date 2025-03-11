@@ -309,7 +309,7 @@ export function checkESLintConfig(): void {
       execSync('npx eslint .', { stdio: 'inherit' });
       console.log(chalk.green('✔ ESLint checks completed successfully.'));
     } catch (error) {
-      console.error(chalk.red('❌ ESLint found issues.', error));
+      console.error(chalk.red('❌ ESLint found issues.'), error);
       console.log(chalk.red('\n👉 Fix ESLint config: npm run lint:fix'));
       process.exit(1);
     }

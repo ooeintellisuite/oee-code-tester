@@ -93,6 +93,8 @@ describe('checkPrettierConfig', () => {
         chalk.red('❌ Prettier formatting failed.'), expect.any(Error)
       );
 
+    expect(logSpy).toHaveBeenCalledWith(chalk.red('\n👉 Fix Prettier config: npx prettier --write .'));
+      
     // Ensure process.exit is called with exit code 1
     expect(exitSpy).toHaveBeenCalledWith(1);
 
