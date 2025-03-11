@@ -269,7 +269,7 @@ export function checkPrettierConfig(): void {
       execSync('npx prettier --write .', { stdio: 'inherit' });
       console.log(chalk.green('✔ Prettier formatting completed.'));
     } catch (error) {
-      console.error(chalk.red('❌ Prettier formatting failed.', error));
+      console.error(chalk.red('❌ Prettier formatting failed.'), error);
       console.log(chalk.red('\n👉 Fix Prettier config: npx prettier --write .'));
       process.exit(1);
     }

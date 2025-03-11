@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 import { execSync } from 'child_process';
 
 import chalk from 'chalk';
@@ -66,18 +67,41 @@ describe('checkPrettierConfig', () => {
     logSpy.mockRestore();
   });
   it('should log an error and exit when Prettier formatting fails', () => {
-    // Mock console.error and process.exit
+    vi.mocked(readPrettierConfig).mockReturnValue('correct content');
+    vi.mocked(isPrettierConfigValid).mockReturnValue(true);
+
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
+        return undefined as never;
+      });
+    // Mock execSync to throw an error
+    vi.mocked(execSync).mockImplementation(() => {
+      throw new Error('Mocked Prettier formatting error');
+    });
 
-    checkPrettierConfig(); // Run function
+    // Run the function
+    checkPrettierConfig();
 
-    expect(errorSpy).toHaveBeenCalled(); // Ensure error logging happens
-    expect(errorSpy.mock.calls[0][0]).toContain('❌ Prettier formatting failed.');
-    
-    expect(exitSpy).toHaveBeenCalledWith(1); // Ensure process.exit is called
+    // Verify log messages
+    expect(logSpy).toHaveBeenCalledWith(chalk.yellow('🔍 Checking Prettier configuration...'));
+    expect(logSpy).toHaveBeenCalledWith(chalk.green('✔ .prettierrc matches the recommended configuration.'));
+    expect(logSpy).toHaveBeenCalledWith(chalk.yellow('🚀 Running Prettier formatting...'));
+
+    // Ensure error logging is correct
+    expect(errorSpy).toHaveBeenCalledWith(
+        chalk.red('❌ Prettier formatting failed.'), expect.any(Error)
+      );
+
+    // Ensure process.exit is called with exit code 1
+    expect(exitSpy).toHaveBeenCalledWith(1);
+
+    // Ensure config creation/fixing was not triggered
+    expect(vi.mocked(fixPrettierConfig)).not.toHaveBeenCalled();
+    expect(vi.mocked(createPrettierConfig)).not.toHaveBeenCalled();
 
     // Restore mocks
+    logSpy.mockRestore();
     errorSpy.mockRestore();
     exitSpy.mockRestore();
   });
