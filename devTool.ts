@@ -35,7 +35,6 @@ import {
   readTsConfig,
 } from './utils/tsConfigUtils';
 
-
 const CONFIG_PATH = path.join(process.cwd(), 'config.json');
 
 /**
@@ -103,7 +102,8 @@ export async function mainMenu(): Promise<void> {
   ])) as { choice: string };
 
   if (choice === 'Run') {
-    runChecks();
+    await runChecks();
+    process.exit(0);
   } else {
     console.log('Goodbye!');
     process.exit();
@@ -115,15 +115,20 @@ export async function mainMenu(): Promise<void> {
  *  @returns {void}
  */
 export function runChecks(): void {
-  console.log(chalk.blue('\n🔍 Running codebase checks...\n'));
-  if (config.enabledChecks.checkTsConfig) checkTsConfig();
-  if (config.enabledChecks.checkDependencies) checkDependencies();
-  if (config.enabledChecks.checkGitignore) checkGitignore();
-  if (config.enabledChecks.checkREADME) checkREADME();
-  if (config.enabledChecks.checkPrettierConfig) checkPrettierConfig();
-  if (config.enabledChecks.checkESLint) checkESLintConfig();
-  console.log(chalk.green('\n✅ Codebase check complete.\n'));
-  mainMenu();
+  try {
+    console.log(chalk.blue('\n🔍 Running codebase checks...\n'));
+    if (config.enabledChecks.checkTsConfig) checkTsConfig();
+    if (config.enabledChecks.checkDependencies) checkDependencies();
+    if (config.enabledChecks.checkGitignore) checkGitignore();
+    if (config.enabledChecks.checkREADME) checkREADME();
+    if (config.enabledChecks.checkPrettierConfig) checkPrettierConfig();
+    if (config.enabledChecks.checkESLint) checkESLintConfig();
+    console.log(chalk.green('\n✅ Codebase check complete.\n'));
+    // mainMenu();
+  } catch (error) {
+    console.error('❌ An error occurred during checks:', error);
+    process.exit(1);
+  }
 }
 
 /**
@@ -135,17 +140,17 @@ export function checkTsConfig(): void {
   console.log(chalk.yellow('🔍 Checking tsconfig.json...'));
   const userTsConfig = readTsConfig();
   if (!userTsConfig) {
-      console.log(chalk.red('❌ No tsconfig.json file found! Creating one...'));
-      createTsConfig();
-      console.log(chalk.green('✔ tsconfig.json has been created.'));
+    console.log(chalk.red('❌ No tsconfig.json file found! Creating one...'));
+    createTsConfig();
+    console.log(chalk.green('✔ tsconfig.json has been created.'));
   } else if (!isTsConfigValid(userTsConfig)) {
-      console.log(chalk.red('❌ tsconfig.json is incorrect! Fixing it...'));
-      fixTsConfig();
-      console.log(
-        chalk.green(
-          '✔ tsconfig.json has been updated to the correct configuration.',
-        ),
-      );
+    console.log(chalk.red('❌ tsconfig.json is incorrect! Fixing it...'));
+    fixTsConfig();
+    console.log(
+      chalk.green(
+        '✔ tsconfig.json has been updated to the correct configuration.',
+      ),
+    );
   } else {
     console.log(
       chalk.green('✔ tsconfig.json matches the expected configuration.'),
@@ -257,7 +262,9 @@ export function checkPrettierConfig(): void {
     createPrettierConfig();
     console.log(chalk.green('✔ .prettierrc has been created.'));
   } else if (!isPrettierConfigValid(userPrettierConfig)) {
-    console.log(chalk.red('❌ .prettierrc settings are incorrect! Fixing it...'));
+    console.log(
+      chalk.red('❌ .prettierrc settings are incorrect! Fixing it...'),
+    );
     fixPrettierConfig();
     console.log(chalk.green('✔ .prettierrc has been updated.'));
   } else {
@@ -270,7 +277,9 @@ export function checkPrettierConfig(): void {
       console.log(chalk.green('✔ Prettier formatting completed.'));
     } catch (error) {
       console.error(chalk.red('❌ Prettier formatting failed.'), error);
-      console.log(chalk.red('\n👉 Fix Prettier config: npx prettier --write .'));
+      console.log(
+        chalk.red('\n👉 Fix Prettier config: npx prettier --write .'),
+      );
       process.exit(1);
     }
   }

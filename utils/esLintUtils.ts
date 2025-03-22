@@ -1,6 +1,5 @@
 import path from 'path';
 
-
 import { generateChecksum } from './checksumUtils';
 import { readFile, writeFile } from './fileUtils';
 
