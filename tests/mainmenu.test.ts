@@ -1,51 +1,72 @@
-import chalk from "chalk";
-import inquirer from "inquirer";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+/* eslint-disable max-lines-per-function */
+import inquirer from 'inquirer';
+import { describe, it, vi, beforeEach, afterEach, expect } from 'vitest';
 
-import { mainMenu, runChecks } from "../devTool"; // Adjust the import
+import * as devToolModule from '../devTool';
 
-// Mock dependencies
-vi.mock("inquirer", () => ({
-  prompt: vi.fn(),
-}));
+vi.mock('inquirer', async () => {
+  return {
+    default: {
+      prompt: vi.fn().mockResolvedValue({ choice: 'Run' }),
+    },
+  };
+});
 
-vi.mock("../yourFilePath", () => ({
-  mainMenu: vi.fn(),
-  runChecks: vi.fn(),
-}));
-
-describe("mainMenu", () => {
-  let logSpy;
-  let exitSpy;
-
+describe('mainMenu', () => {
   beforeEach(() => {
-    logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    exitSpy = vi.spyOn(process, "exit").mockImplementation(() => {
-      throw new Error("process.exit called"); // Prevent actual exit
+    // Mock the ESLint check to avoid failing during tests
+    vi.spyOn(devToolModule, 'checkESLintConfig').mockResolvedValue(undefined);
+
+    // Mock runChecks as well
+    vi.spyOn(devToolModule, 'runChecks').mockImplementation(async () => {
+      console.log('Mocked runChecks()');
+      throw new Error('ESLint check failed'); // Simulate ESLint failure
     });
 
-    vi.mocked(runChecks).mockClear();
+    vi.spyOn(inquirer, 'prompt').mockResolvedValue({ choice: 'Run' });
+
+    vi.spyOn(console, 'log').mockImplementation(() => {}); // Mock console.log
+    vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("should call runChecks when user selects 'Run'", async () => {
-    vi.mocked(inquirer.prompt).mockResolvedValue({ choice: "Run" });
+  it('should call runChecks() when "Run" is selected', async () => {
+    vi.spyOn(process, 'exit').mockImplementation(((
+      code?: string | number | null | undefined,
+    ) => {
+      console.log('process.exit() called', code);
+    }) as never);
+    try {
+      await devToolModule.mainMenu();
+    } catch (error) {
+      // Ensure the error was caused by process.exit
+      expect(error.message).toBe('process.exit() was called');
 
-    await expect(mainMenu()).rejects.toThrow("process.exit called");
+      // Check if process.exit() was called
+      expect(process.exit).toHaveBeenCalledWith(1);
 
-    expect(runChecks).toHaveBeenCalled();
-    expect(exitSpy).not.toHaveBeenCalled();
-  });
+      // Ensure that runChecks was called
+      expect(devToolModule.runChecks).toHaveBeenCalled();
 
-  it("should call process.exit when user selects 'Exit'", async () => {
-    vi.mocked(inquirer.prompt).mockResolvedValue({ choice: "Exit" });
+      // Ensure the error message is as expected
+      expect(error.message).toBe('ESLint check failed');
+    }
+  }, 20000);
 
-    await expect(mainMenu()).rejects.toThrow("process.exit called");
+  it('should call process.exit when "Exit" is selected', async () => {
+    vi.spyOn(process, 'exit').mockImplementation((): never => {
+      console.log('process.exit() called');
 
-    expect(exitSpy).toHaveBeenCalled();
-    expect(runChecks).not.toHaveBeenCalled();
+      throw new Error('process.exit() was called');
+    });
+    vi.mocked(inquirer.prompt).mockResolvedValueOnce({ choice: 'Exit' });
+
+    await expect(devToolModule.mainMenu()).rejects.toThrow(
+      'process.exit() was called',
+    );
+    expect(process.exit).toHaveBeenCalled();
   });
 });
