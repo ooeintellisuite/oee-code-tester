@@ -28,3 +28,11 @@ Explore -> Logs -> Loki -> Last 1 hour
 A Node.js server is responsible for running your application (e.g., an Express server), and it should send observability data (logs, traces, and metrics) to the OpenTelemetry collector, which then forwards it to the Docker container running the Grafana LGTM stack.
 
 4. node server.js
+
+For further updates, since this tool enforces git standards, such as, Branch Name Validation, and Commit Message Validation, all work must be done on branches that are in this format, "features/<some-feature>". Git commit messages must follow https://www.conventionalcommits.org/en/v1.0.0/.
+
+Some examples of git commit messages are:
+
+type must be one of [build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test] [type-enum]
+
+So, as an example, git commit -m 'feat: add new dashboard'
