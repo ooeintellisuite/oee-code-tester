@@ -124,7 +124,6 @@ export function runChecks(): void {
     if (config.enabledChecks.checkPrettierConfig) checkPrettierConfig();
     if (config.enabledChecks.checkESLint) checkESLintConfig();
     console.log(chalk.green('\n✅ Codebase check complete.\n'));
-    // mainMenu();
   } catch (error) {
     console.error('❌ An error occurred during checks:', error);
     process.exit(1);
