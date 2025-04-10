@@ -1,0 +1,9 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+BRANCH_NAME=$(git symbolic-ref --short HEAD)
+
+if [[ ! "$BRANCH_NAME" =~ ^features/ ]]; then
+  echo "Error: Branch name must start with 'features/'."
+  exit 1
+fi
+

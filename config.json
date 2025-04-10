@@ -1,16 +1,11 @@
 {
   "enabledChecks": {
+    "checkTsConfig": true,
     "checkDependencies": true,
     "checkGitignore": true,
     "checkREADME": true,
-    "checkComponentsFolder": true,
-    "checkBuildTool": false,
-    "checkTestingFramework": true,
-    "checkImplicitAny": true,
-    "checkReactFCUsage": true,
-    "checkStateManagement": true,
     "checkPrettierConfig": true,
-    "checkFunctionComments": true
+    "checkESLint": true
   },
   "dependenciesToCheck": [
     "@tanstack/react-query",

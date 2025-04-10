@@ -1,0 +1,5 @@
+eslint.config.js
+**/.next/**
+**/.dist/**
+**/wwwroot/lib/**
+**/website-deployment.yml

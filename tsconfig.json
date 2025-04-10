@@ -1,5 +1,13 @@
 {
-    "compilerOptions": {
-      "strict": true
-    }
-}  
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
+  },
+  "include": ["apps", "packages"],
+  "exclude": ["node_modules", "dist"]
+}
